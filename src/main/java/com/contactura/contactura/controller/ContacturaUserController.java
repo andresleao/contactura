@@ -1,6 +1,7 @@
 package com.contactura.contactura.controller;
 
 import java.util.List;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +25,22 @@ public class ContacturaUserController {
 
 	@Autowired
 	private ContacturaUserRepository repository; 
+	
+	@RequestMapping("/login")
+	@PostMapping
+	public ResponseEntity<?> login() {
+		Random random = new Random();
+		int token = random.nextInt(999999999);
+		return ResponseEntity.ok().body("Usuário logado com Sucesso! " + token);
+	}
 		
-	// Listar todos os usuários
+//  Listar todos os usuários
 	@GetMapping
 	public List findAll() {
 		return repository.findAll();
 	}
 	
-	// Retornar usuário por id
+//  Retornar usuário por id
 	@GetMapping(value = "{id}")
 	public ResponseEntity<?> findById(@PathVariable long id) {
 		return repository.findById(id)
@@ -39,8 +48,9 @@ public class ContacturaUserController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
-	// Criar novo usuário
+//  Criar novo usuário
 	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
 	public ContacturaUser create(@RequestBody ContacturaUser user) {
 		user.setPassword(criptografarSenha(user.getPassword()));
 		return repository.save(user);
@@ -48,20 +58,21 @@ public class ContacturaUserController {
 	
 //	Atualizar Usuário
 	@PutMapping(value = "{id}")
+	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> update(@PathVariable long id, @RequestBody ContacturaUser user){
 		return repository.findById(id)
 				.map(record -> {
 					record.setName(user.getName());
 					record.setUsername(user.getUsername());
 					record.setPassword(criptografarSenha(user.getPassword()));
-					record.setAdmin(false);
+					record.setAdmin(user.isAdmin());
 					ContacturaUser update = repository.save(record);
 					return ResponseEntity.ok().body(update);
 				}).orElse(ResponseEntity.notFound().build());
 	}
 	
-	// Deletar usuário
-	@DeleteMapping
+//  Deletar usuário
+	@DeleteMapping(path = {"{id}"})
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> delete(@PathVariable long id) {
 		return repository.findById(id)

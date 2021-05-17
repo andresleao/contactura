@@ -16,7 +16,7 @@ public class ContacturaApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ContacturaApplication.class, args);
 	}
-	
+	/*
 	@Bean
 	CommandLineRunner init(ContacturaRepository repository) {
 		return args->{
@@ -33,5 +33,5 @@ public class ContacturaApplication {
 			.forEach(System.out::println);
 		};
 	}
-
+	 */
 }
